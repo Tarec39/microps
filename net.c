@@ -7,11 +7,18 @@
 #include "util.h"
 #include "net.h"
 
+struct net_protocol {
+    struct net_protocol *next;
+    uint16_t type;
+    net_protocol_handler_t handler;
+};
+
 /*
  * NOTE: if you want to add/delete the entries after net_run(),
  *       you need to protect these lists with a lock.
  */
 static struct net_device *devices; 
+static struct net_protocol *protocols;
 //staticはこのファイル内のグローバル変数
 //devicesというアドレスが確保され続ける感じ。ちなみに初期値はNULL
 
@@ -122,6 +129,14 @@ net_device_output( //ネットワークデバイスからデータを送信す�
     }
 
     return 0;
+}
+
+/*
+ * NOTE: must not be call after net_run()
+ */
+int
+net_protocol_register(uint16_t type, net_protocol_handler_t handler)
+{
 }
 
 int //どのようなデバイスからどのようなパケットを受信したのかをログに出力する関数。引数はインターネット層のプロトコルパケット
