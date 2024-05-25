@@ -101,6 +101,11 @@ net_device_output( //ネットワークデバイスからデータを送信す�
 }
 
 int
+net_input(uint16_t type, const uint8_t *data, size_t len, struct net_device *dev)
+{
+}
+
+int
 net_init(void)
 {
     infof( "initialization..."); //p32-33。infofはutil.hに記載の筆者の自作関数。。普通の動作ログのため。
