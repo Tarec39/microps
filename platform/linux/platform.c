@@ -11,7 +11,7 @@
 int
 platform_init(void)
 {
-    srandom(time(NULL));
+    srandom(time(NULL));//srandomはseed randomの意味。乱数をちゃんとランダムにするため。
     return 0;
 }
 
