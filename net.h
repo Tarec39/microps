@@ -12,28 +12,28 @@
 #define NET_DEVICE_TYPE_LOOPBACK  0x0001
 #define NET_DEVICE_TYPE_ETHERNET  0x0002
 
-#define NET_DEVICE_FLAG_UP        0x0001
-#define NET_DEVICE_FLAG_LOOPBACK  0x0010
-#define NET_DEVICE_FLAG_BROADCAST 0x0020
+#define NET_DEVICE_FLAG_UP        0x0001 //0xは16進数を表す。000 00000 0000 0000 
+#define NET_DEVICE_FLAG_LOOPBACK  0x0010 //0000が実際の数字。0001であれば、最後列4ビットが分かり、1000であれば最前列4ビットが変わる
+#define NET_DEVICE_FLAG_BROADCAST 0x0020 //1=0001 2=0010 4=0100 8=1000
 #define NET_DEVICE_FLAG_P2P       0x0040
 #define NET_DEVICE_FLAG_NEED_ARP  0x0100
 
 #define NET_DEVICE_ADDR_LEN 16
 
-#define NET_DEVICE_IS_UP(x) ((x)->flags & NET_DEVICE_FLAG_UP)
+#define NET_DEVICE_IS_UP(x) ((x)->flags & NET_DEVICE_FLAG_UP) //任意の（後者の）ビットが立っていれば0x0001=Trueが返る。でなければ0でFalseが返る。
 #define NET_DEVICE_STATE(x) (NET_DEVICE_IS_UP(x) ? "UP" : "DOWN")
 
 struct net_device {
-    struct net_device *next;
+    struct net_device *next; //C言語ではこれで連結リスト（ノード）を作成する
     unsigned int index;
     char name[IFNAMSIZ];
-    uint16_t type;
-    uint16_t mtu;
-    uint16_t flags;
-    uint16_t hlen;
-    uint16_t alen;
-    uint8_t addr[NET_DEVICE_ADDR_LEN];
-    uint8_t broadcast[NET_DEVICE_ADDR_LEN];
+    uint16_t type; //unit16_t 符号なし(unsigned )16bit整数型のこと 0000 0000 0000 0000
+    uint16_t mtu; //Max Transmission Unit
+    uint16_t flags; //デバイスが有効なのかオプションも使っているのかとか
+    uint16_t hlen; //Ethernetの長さ
+    uint16_t alen; //Macアドレスの長さ
+    uint8_t addr[NET_DEVICE_ADDR_LEN]; //Macアドレスそのもの
+    uint8_t broadcast[NET_DEVICE_ADDR_LEN]; //ブロードキャストアドレス。イーサネットの場合はFF:FF:FF:FF:FF:FF
 };
 
 extern struct net_device *

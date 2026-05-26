@@ -11,6 +11,10 @@
 
 static volatile sig_atomic_t terminate;
 
+static struct net_device *dev;
+
+static struct net_device *dummy_init(void); //教科書通りにいかなかったから、よくわからずAIに書かせた。
+
 static void
 on_signal(int signum)
 {
@@ -19,7 +23,7 @@ on_signal(int signum)
 }
 
 static int
-setup(void)
+setup(void) //テストプログラムの事前準備の担当
 {
     struct sigaction sa = {0};
 
@@ -33,6 +37,13 @@ setup(void)
         errorf("net_init() failure");
         return -1;
     }
+
+    dev = dummy_init();
+    if(!dev){
+        errorf("dummy_init() failure");
+        return -1;
+    }
+
     if (net_run() == -1) {
         errorf("net_run() failure");
         return -1;
@@ -56,6 +67,10 @@ app_main(void)
 {
     debugf("press Ctrl+C to terminate");
     while (!terminate) {
+        if(net_device_output(dev, 0x0800, test_data, sizeof(test_data), NULL) == -1){ //0x0800はIPv4のEthernetタイプコード
+            errorf("net_device_output() failure");
+            break;
+        }
         sleep(1);
     }
     debugf("terminate");
@@ -77,4 +92,30 @@ main(void)
         return -1;
     }
     return ret;
+}
+
+static struct net_device *
+dummy_init(void)
+{
+    struct net_device *dev;
+
+    dev = net_device_alloc();
+    if(!dev) { //devが存在しないなら
+        errorf("net_device_alloc() failure");
+        return NULL;
+    }
+    
+    dev->type = NET_DEVICE_TYPE_DUMMY;
+    dev->mtu = 128;
+    dev->hlen = 0; /* no header */
+    dev->alen = 0; /* no address */
+
+    if(net_device_register(dev) == -1){ //devの登録に失敗したならば
+        errorf("net_device_register () failure");
+        return NULL;
+    }
+
+    infof("success, dev=%s", dev->name);
+    return dev;
+
 }
