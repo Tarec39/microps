@@ -56,6 +56,13 @@ net_device_open(struct net_device *dev)
         errorf("already opened, dev=%s", dev->name);
         return -1;
     }
+    
+    if(dev->ops->open){ //opsのopen関数があれば、つまりNULLでなければ
+        if(dev->ops->open(dev) == -1){ 
+            errorf("failure, dev=%s", dev->name);
+            return -1;
+        }
+    }
 
     dev->flags |= NET_DEVICE_FLAG_UP; //ビット演算子のOR。任意のビットだけを立てる。
     return 0;
@@ -70,6 +77,14 @@ net_device_close(struct net_device *dev)
         errorf("not opened, dev=%s", dev->name);
         return -1;
     }
+
+    if(dev->ops->close){ //opsのclose関数があれば、つまりNULLでなければ
+        if(dev->ops->close(dev) == -1){
+            errorf("failure, dev=%s", dev->name);
+            return -1;
+        }
+    }
+
     //両方とも 1 のビットだけを 1 のまま残し、それ以外は全部 0 にする
     dev->flags &= ~NET_DEVICE_FLAG_UP; //ビット演算子のAND。~はビット列の反転。任意のビットだけ立ったままに。
     return 0;
@@ -92,6 +107,15 @@ net_device_output( //ネットワークデバイスからデータを送信す�
         return -1;
     }
 
+    if(!dev->ops->output){ //opsのoutput関数がなければ、つまりNULLならば
+        errorf("output callback function is not set, dev=%s", dev->name);
+        return -1;
+    }
+    if(dev->ops->output(dev, type, data, len, dst) == -1){ //output関数が-1を返したら、つまり失敗したら
+        errorf("failure, dev=%s", dev->name);
+        return -1;
+    }
+
     if(dev->mtu < len) { //転送最大単位よりも送信データが大きいならば
         errorf("too long, dev=%s, mtu=%u, len=%zu", dev->name, dev->mtu, len); //%uは符号なし整数 unsigned int。
         return -1;
@@ -100,9 +124,12 @@ net_device_output( //ネットワークデバイスからデータを送信す�
     return 0;
 }
 
-int
+int //どのようなデバイスからどのようなパケットを受信したのかをログに出力する関数。引数はインターネット層のプロトコルパケット
 net_input(uint16_t type, const uint8_t *data, size_t len, struct net_device *dev)
 {
+    debugf("dev-%s, type=0x%04x, len=%zu", dev->name, type, len);
+    debugdump(data, len);
+    return 0;
 }
 
 int

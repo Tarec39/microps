@@ -6,6 +6,7 @@
 
 #include "util.h"
 #include "net.h"
+#include "driver/loopback.h"
 
 #include "test.h"
 
@@ -38,9 +39,9 @@ setup(void) //テストプログラムの事前準備の担当
         return -1;
     }
 
-    dev = dummy_init();
+    dev = loopback_init();
     if(!dev){
-        errorf("dummy_init() failure");
+        errorf("loopback_init() failure");
         return -1;
     }
 
@@ -92,30 +93,4 @@ main(void)
         return -1;
     }
     return ret;
-}
-
-static struct net_device *
-dummy_init(void)
-{
-    struct net_device *dev;
-
-    dev = net_device_alloc();
-    if(!dev) { //devが存在しないなら
-        errorf("net_device_alloc() failure");
-        return NULL;
-    }
-    
-    dev->type = NET_DEVICE_TYPE_DUMMY;
-    dev->mtu = 128;
-    dev->hlen = 0; /* no header */
-    dev->alen = 0; /* no address */
-
-    if(net_device_register(dev) == -1){ //devの登録に失敗したならば
-        errorf("net_device_register () failure");
-        return NULL;
-    }
-
-    infof("success, dev=%s", dev->name);
-    return dev;
-
 }

@@ -34,9 +34,11 @@ struct net_device {
     uint16_t alen; //Macアドレスの長さ
     uint8_t addr[NET_DEVICE_ADDR_LEN]; //Macアドレスそのもの
     uint8_t broadcast[NET_DEVICE_ADDR_LEN]; //ブロードキャストアドレス。イーサネットの場合はFF:FF:FF:FF:FF:FF
+    struct net_device_ops *ops; 
+    void *priv; //privateの略。ドライバ固有のデータを格納するためのポインタ。ドライバが必要に応じて使用することができる。
 };
 
-struct net_device_ops {
+struct net_device_ops { //opsはオペレーション。操作関数一覧。
     int (*open)(struct net_device *dev);
     int (*close)(struct net_device *dev);
     int (*output)(struct net_device *dev, uint16_t type, const uint8_t *data, size_t len, const void *dst);
