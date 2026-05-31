@@ -14,8 +14,6 @@ static volatile sig_atomic_t terminate;
 
 static struct net_device *dev;
 
-static struct net_device *dummy_init(void); //教科書通りにいかなかったから、よくわからずAIに書かせた。
-
 static void
 on_signal(int signum)
 {
@@ -68,7 +66,7 @@ app_main(void)
 {
     debugf("press Ctrl+C to terminate");
     while (!terminate) {
-        if(net_device_output(dev, 0x0800, test_data, sizeof(test_data), NULL) == -1){ //0x0800はIPv4のEthernetタイプコード
+        if(net_device_output(dev, NET_PROTOCOL_TYPE_IP, test_data, sizeof(test_data), NULL) == -1){ //0x0800はIPv4のEthernetタイプコード
             errorf("net_device_output() failure");
             break;
         }

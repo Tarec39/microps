@@ -6,6 +6,7 @@
 
 #include "util.h"
 #include "net.h"
+#include "ip.h"
 
 struct net_protocol {
     struct net_protocol *next;
@@ -137,6 +138,27 @@ net_device_output( //ネットワークデバイスからデータを送信す�
 int
 net_protocol_register(uint16_t type, net_protocol_handler_t handler)
 {
+    struct net_protocol *proto;
+
+    for(proto = protocols; proto; proto = proto->next){  //初期化; 条件; 更新; ノードを順番に見ていく。whileと同じ。用途は少し違うが...
+        if(type == proto->type) {
+            errorf("already registered, type=0x%04x", proto->type);
+            return -1;
+        }
+    }
+
+    proto = memory_alloc(sizeof(*proto));
+    if(!proto){//メモリの確保に失敗したら
+        errorf("memory_alloc() failure");
+        return -1;
+    }
+
+    proto->type = type;
+    proto->handler = handler;
+    proto->next = protocols; //新しいノードは古いノードすべてを記録する...proto1 ---> proto0 ---> NULLと新しいのが先頭
+    protocols = proto; //ちなみにこれで連結リストの先頭に追加する
+    infof("success, type=0x%04x", proto->type);
+    return 0;
 }
 
 int //どのようなデバイスからどのようなパケットを受信したのかをログに出力する関数。引数はインターネット層のプロトコルパケット
@@ -153,6 +175,10 @@ net_init(void)
     infof( "initialization..."); //p32-33。infofはutil.hに記載の筆者の自作関数。。普通の動作ログのため。
     if (platform_init() == -1) {
         errorf( "platform_init() failure");
+        return -1;
+    }
+    if (ip_init() == -1) { //
+        errorf( "ip_init() failure");
         return -1;
     }
     return 0;

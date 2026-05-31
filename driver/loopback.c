@@ -10,7 +10,7 @@
 static int //ループバックデバイスの出力関数。引数は、送信するデータの種類、内容、長さ、宛先アドレス。
 loopback_output(struct net_device *dev, uint16_t type, const uint8_t *data, size_t len, const void *dst)
 {
-    debugf("dev-%s, type=0x%04x, len=%zu", dev->name, type, len);
+    debugf("dev=%s, type=0x%04x, len=%zu", dev->name, type, len);
     debugdump(data, len);
     return net_input(type, data, len, dev); //ループバックデバイスは、送信されたパケットをそのまま受信する。引数のパケットをそのままプロトコルスタックに渡す。
 }

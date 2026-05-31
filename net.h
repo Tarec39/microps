@@ -51,7 +51,7 @@ struct net_device_ops { //opsはオペレーション。操作関数一覧。
     int (*output)(struct net_device *dev, uint16_t type, const uint8_t *data, size_t len, const void *dst);
 };
 
-typedef void (*net_protocol_handler_t)(const uint8_t *data, size_t len, struct net_device *dev);
+typedef void (*net_protocol_handler_t)(const uint8_t *data, size_t len, struct net_device *dev); //プロトコル操作関数の型定義。引数は受信データ、受信データの長さ、受信したネットワークデバイス
 
 extern struct net_device *
 net_device_alloc(void);
